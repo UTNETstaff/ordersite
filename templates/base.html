@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="ja">
+    {% load static %}
+    <head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+	<meta name="description" content="">
+	<meta name="author" content="">
+	<link rel="icon" href="/favicon.ico">
+	
+	<title>{% block bartitle %}{% endblock %}</title>
+	
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+	<script src="https://code.jquery.com/ui/1.12.0/jquery-ui.js"></script>
+	<script src="/static/js/bootstrap.min.js"></script>
+
+	<!-- Bootstrap core CSS -->
+	<link href="/static/css/bootstrap.min.css" rel="stylesheet">
+	<link href="/static/css/footer.css" rel="stylesheet">
+	<link href="https://ajax.googleapis.com/ajax/libs/jqueryui/1/themes/redmond/jquery-ui.css" rel="stylesheet" />
+	
+	<link rel="stylesheet" type="text/css" href="/static/datatable/css/datatable-bootstrap.min.css" media="screen">
+	<script type="text/javascript" src="/static/datatable/js/datatable.min.js"></script>
+	<script type="text/javascript" src="/static/datatable/js/datatable.jquery.min.js"></script>
+
+	<link rel="stylesheet" href="/static/modaal.min.css">
+	<script src="/static/modaal.min.js"></script>
+
+	{% block additional_script %}{% endblock %}
+	
+    </head>
+  
+    <body>
+	<nav class="navbar navbar-inverse navbar-fixed-top">
+	    <div class="container-fluid">
+		<div class="navbar-header">
+		    <span style="color: white;">{{ request.user.username }}</span>
+		</div>
+		<div class="collapse navbar-collapse" id="navbarMain">
+		    <ul class="nav navbar-nav">
+			<li class=""><a href="{% url 'system:list' %}">依頼書一覧</a></li>
+			<li class=""><a href="{% url 'system:new' %}">新規オーダー</a></li>
+			<li class=""><a href="{% url 'system:nextnew' %}">次年度新規オーダー</a></li>
+			<li><a href="{% url 'logout' %}">Logout</a></li>
+		    </ul>
+		</div>
+	    </div>
+	</nav>
+    
+	<br/><br/><br/>
+	<div class="container-fluid">
+	    <div class="page-header">
+		<h1>{% block pagetitle %}{% endblock %}</h1>
+	    </div>
+	    <p class="lead">
+		{% block contents %}{% endblock %}
+	    </p>
+	</div>
+    
+	<footer class="footer">
+	    <div class="container">
+		<p class="text-muted" align="center">ITCオーダー管理  {% now "Y/n/j H:i:s T" %}</p>
+	    </div>
+	</footer>
+    </body>
+</html>
+

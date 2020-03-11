@@ -1,0 +1,34 @@
+{% extends "admbase.html" %}
+
+{% block contents %}
+
+{% if form.errors %}
+<p>ユーザ名かパスワードが間違っています</p>
+{% endif %}
+
+{% if next %}
+  {% if user.is_authenticated %}
+    <p>Your account doesn't have access to this page. To proceed,
+    please login with an account that has access.</p>
+{% else %}
+<p style="text-align: center;">指定されたページにアクセスするにはログインが必要です</p>
+{% endif %}
+{% endif %}
+
+<form method="post" action="{% url 'login' %}">
+  {% csrf_token %}
+  <table class="table table-condensed">
+    <tr>
+      <td style="text-align: right;">{{ form.username.label_tag }}</td>
+      <td>{{ form.username }}</td>
+    </tr>
+    <tr>
+      <td style="text-align: right;">{{ form.password.label_tag }}</td>
+      <td>{{ form.password }}</td>
+    </tr>
+  </table>
+  
+  <input type="submit" value="login" />
+  <input type="hidden" name="next" value="{{ next }}" />
+</form>
+{% endblock %}

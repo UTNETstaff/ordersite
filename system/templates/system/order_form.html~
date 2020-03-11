@@ -1,0 +1,15 @@
+{% extends "system/base.html" %}
+
+{% block pagetitle %}<center><H1>{{ pagetitle  }}</H1></center>{% endblock %}
+
+{% block contents %}
+
+<form action="" method="post" class="form-horizontal" role="form" enctype="multipart/form-data">
+    {% csrf_token %}
+    <table class="table table-condensed">
+       {{ form.as_table }}
+    </table>
+    <input type="submit" class="btn btn-warning" role="button" value="登録">
+</form>
+
+{% endblock contents %}

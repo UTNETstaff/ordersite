@@ -1,0 +1,79 @@
+{% extends "system/base.html" %}
+
+{% block pagetitle %}<center><H1>購入依頼書一覧</H1></center>{% endblock %}
+
+{% block contents %}
+
+<script type="text/javascript" src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
+<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/plug-ins/1.10.6/sorting/currency.js"></script>
+
+<script type="text/javascript">
+ $(document).ready(function() {
+     $('[id=order_list]').DataTable({
+         columnDefs: [{ "type": 'currency', "targets": [6,7] }],
+         stateSave: true,
+     });
+ });
+</script>
+
+    <style>
+     th {
+	 text-align: center;
+	 vertical-align: middle;
+     }
+    </style>
+
+<div>
+    <form method="POST">
+        {% csrf_token %}
+        {% for field in test_form %}
+            <div class="form-group form-inline">
+                <label class="control-label">{{ field.label }}:</label>
+                    {{ field }}
+            </div>
+        {% endfor %}
+        <input class="btn btn-success" type="submit" id="button" name="button" value="検索">
+    </form>
+</div>
+</br>
+    
+	<table id="order_list" class="table table-condensed table-bordered table-striped">
+	    <thead>
+		<th>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th>
+		<th>年度</th><th nowrap>整理<br />番号</th><th>発注</th>
+		<th>依頼(発注)<br />年月日</th><th>品名</th><th>数量</th><th>金額</th>
+		<th>取引先</th><th>購入依頼書</th><th nowrap>見積等<br />(PDF)</th>
+	    </thead>
+	    <tbody>
+		{% for obj in object_list %}
+		    <tr>
+			<td style="text-align: center;">
+			    <a class="btn btn-warning btn-xs" role="btn" href="{% url 'system:update' obj.pk %}">
+				変更
+			    </a>
+			</td>
+			<td style="text-align: center;">{{ obj.nendo }}</td>
+			<td style="text-align: center;">{{ obj.bango }}</td>
+			<td style="text-align: center;">{{ obj.order_status|cut:"発注" }}</td>
+			<td style="text-align: center;">{{ obj.order_date|date:"y/m/d" }}</td>
+			<td style="text-align: left;">{{ obj.item_name }}</td>
+			<td style="text-align: right;">{{ obj.suuryou }} {{ obj.tanni }}</td>
+			<td style="text-align: right;">{{ obj.kingaku|rjust:"20" }} 円</td>
+			<td style="text-align: left;">{{ obj.suppliers  }}</td>
+			<td style="text-align: center;">
+			    <a class="btn btn-info btn-xs" role="btn"  href="{% url 'system:xlfile' obj.pk %}">
+				表示
+			    </a>
+			</td>
+			<td style="text-align: center;">
+			    {% if obj.pdffile  %}
+				<a class="btn btn-info btn-xs" role="btn"  href="/files/{{ obj.pdffile }}">表示</a>
+			    {% endif %}
+			</td>
+		    </tr>
+		{% endfor %}
+	    </tbody>
+	</table>
+	<div id="paging-order_list"></div>
+
+{% endblock contents %}

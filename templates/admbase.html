@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="ja">
+    {% load static %}
+    <head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+	<meta name="description" content="">
+	<meta name="author" content="">
+	<link rel="icon" href="/favicon.ico">
+	
+	<title>{% block bartitle %}{% endblock %}</title>
+	
+
+	<link rel="stylesheet" type="text/css" href="/static/datatable/css/datatable-bootstrap.min.css" media="screen">
+	<!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script> -->
+	<script src="/static/jquery.min.js"></script>
+
+	<script src="/static/jquery-ui.js"></script>
+	<script src="/static/table2csv.js"></script>
+	<script src="/static/js/bootstrap.min.js"></script>
+	<!-- <script type="text/javascript" src="/static/jquery.tablesorter.min.js"></script> -->
+	<!-- Bootstrap core CSS -->
+	<link href="/static/css/bootstrap.min.css" rel="stylesheet">
+	<link href="/static/css/footer.css" rel="stylesheet">
+	<link href="/static/jquery-ui.css" rel="stylesheet" />
+	<script type="text/javascript" src="/static/datatable/js/datatable.min.js"></script>
+	<script type="text/javascript" src="/static/datatable/js/datatable.jquery.min.js"></script>
+
+	<link rel="stylesheet" href="/static/css/modaal.min.css">
+	<script src="/static/js/modaal.min.js"></script>
+
+	{% block additional_script %}{% endblock %}
+	
+	<style>
+	    #maintbl td, #maintbl th {
+	    padding-left: 10px;
+	    padding-right: 20px;
+	    font-size: 13px;
+	    }
+	    #maintbl th.header,#maintbl th.tablesorter-headerUnSorted { 
+	    background-image: url('/static/img/green-unsorted.gif'); 
+	    background-repeat: no-repeat; 
+	    background-position: center right; 
+	    }
+	    #maintbl th.headerSortUp ,#maintbl th.tablesorter-headerAsc { 
+	    background-image: url('/static/img/green-asc.gif');
+	    background-repeat: no-repeat;
+	    background-position: center right; 
+	    }
+	    #maintbl th.headerSortDown, #maintbl th.tablesorter-headerDesc { 
+	    background-image: url('/static/img/green-desc.gif'); 
+	    background-repeat: no-repeat;
+	    background-position: center right; 
+	    }
+	    /*
+	    div.tooltip{
+	    width: 250px;
+	    position: absolute;
+	    left: -9999px;
+	    background: #EEE;
+	    padding: 5px;
+	    border: 1px solid #AAA;
+	    }
+	    div.tooltip p{
+	    color: #FFF;
+	    background: #222;
+	    padding: 5px 10px;
+	    }*/
+	</style>
+	<!--<script src="https://ipac.adm.u-tokyo.ac.jp/static/tooltip.js"></script>-->
+    </head>
+  
+    <body>
+	<nav class="navbar navbar-inverse navbar-fixed-top">
+	    <div class="container-fluid">
+		<div class="collapse navbar-collapse" id="navbarMain">
+		    <ul class="nav navbar-nav">
+		     	<li class="">
+			 <a href="{% url 'logout' %}" style="color: #aaaaaa">
+			   LOGOUT
+			 </a>
+			</li>
+		    </ul>
+		</div>
+	    </div>
+	</nav>
+	<div class="container-fluid" style="margin-top: 30px">
+	    <div class="page-header">
+		<h1>{% block pagetitle %}{% endblock %}</h1>
+	    </div>
+	    <p class="lead">
+		{% block contents %}{% endblock %}
+	    </p>
+	</div>
+    
+	<footer class="footer">
+	    <div class="container">
+		<p class="text-muted" align="center">ITCオーター管理 {% now "Y/n/j H:i:s T" %}</p>
+	    </div>
+	</footer>
+    </body>
+</html>
+

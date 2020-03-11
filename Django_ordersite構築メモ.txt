@@ -1,0 +1,1435 @@
+
+■Pythonのインストール
+＊Windowsの場合: 
+https://www.python.jp/install/windows/install_py3.html
+https://www.python.org/downloads/windows/
+
+■仮想環境の作成
+C:\Users\izume> AppData\Local\Programs\Python\Python38\python -m venv python-kasoukankyo
+
+■Python仮想環境の有効化
+C:\Users\izume> python-kasoukankyo\Scripts\activate
+
+(python-kasoukankyo) C:\Users\izume> 
+
+■Djangoと追加のモジュールをインストール
+(python-kasoukankyo) C:\Users\izume>pip install -U Django==2.2.* django-debug-toolbar
+Collecting Django==2.2.*
+  Downloading https://files.pythonhosted.org/packages/a0/36/463632a2e9161a7e713488d719a280e8cb0c7e3a66ed32a32e801891caae/Django-2.2.7-py3-none-any.whl (7.5MB)
+     |████████████████████████████████| 7.5MB 6.8MB/s
+Collecting django-debug-toolbar
+  Downloading https://files.pythonhosted.org/packages/14/92/d923c1df1f927d5395438eb2dc0cab41084009fcaae13b4974eca1d821b2/django_debug_toolbar-2.1-py3-none-any.whl (198kB)
+     |████████████████████████████████| 204kB 6.4MB/s
+Collecting pytz (from Django==2.2.*)
+  Downloading https://files.pythonhosted.org/packages/e7/f9/f0b53f88060247251bf481fa6ea62cd0d25bf1b11a87888e53ce5b7c8ad2/pytz-2019.3-py2.py3-none-any.whl (509kB)
+     |████████████████████████████████| 512kB ...
+Collecting sqlparse (from Django==2.2.*)
+  Downloading https://files.pythonhosted.org/packages/ef/53/900f7d2a54557c6a37886585a91336520e5539e3ae2423ff1102daf4f3a7/sqlparse-0.3.0-py2.py3-none-any.whl
+Installing collected packages: pytz, sqlparse, Django, django-debug-toolbar
+Successfully installed Django-2.2.7 django-debug-toolbar-2.1 pytz-2019.3 sqlparse-0.3.0
+WARNING: You are using pip version 19.2.3, however version 19.3.1 is available.
+You should consider upgrading via the 'python -m pip install --upgrade pip' command.
+
+■インストール済みのDjangoのバージョンを確認
+(python-kasoukankyo) C:\Users\izume> django-admin --version
+2.2.7
+
+■プロジェクトの作成
+(python-kasoukankyo) C:\Users\izume> django-admin startproject ordersite
+
+(python-kasoukankyo) C:\Users\izume> cd ordersite
+
+(python-kasoukankyo) C:\Users\izume\ordersite> 
+
+---------------------
+manage.py
+　　プロジェクト管理コマンドのスクリプト
+ordersite/__init__.py
+　　このディレクトリがPythonモジュールであることをPythonに認識させるための空ファイル
+ordersite/settings.py
+　　Djangoプロジェクトの設定ファイル。データベース設定やアプリケーションの各種設定を記述する。
+ordersite/urls.py
+　　URL定義ファイル。URLとビューのマッピングを記述する。
+ordersite/wsgi.py
+　　アプリケーションサーバー用の設定ファイル。
+---------------------
+
+■プロジェクトの動作確認
+(python-kasoukankyo) C:\Users\izume\ordersite> python manage.py runserver
+Watching for file changes with StatReloader
+Performing system checks...
+
+System check identified no issues (0 silenced).
+
+You have 17 unapplied migration(s). Your project may not work properly until you apply the migrations for app(s): admin, auth, contenttypes, sessions.
+Run 'python manage.py migrate' to apply them.
+November 13, 2019 - 14:24:45
+Django version 2.2.7, using settings 'ordersite.settings'
+Starting development server at http://127.0.0.1:8000/
+Quit the server with CTRL-BREAK.
+
+■タイムゾーンと言語の設定
+ordersite/settings.py を編集
+
+LANGUAGE_CODE = 'ja'
+TIME_ZONE = 'Asia/Tokyo'
+
+■言語設定の変更確認
+(python-kasoukankyo) C:\Users\izume\ordersite> python manage.py runserver
+
+表示が日本語になったことを確認。
+
+◆◆◆カスタムユーザーモデルを使うならmigrateを実行する前に以下の設定が必要
+
+Django ユーザー カスタマイズ方法
+https://qiita.com/okoppe8/items/10ae61808dc3056f9c8e
+
+system\models.py に AbstractUser を継承して、User を作る。
+
+◆systemアプリケーションを作成
+(python-kasoukankyo) C:\Users\izume\ordersite> python manage.py startapp system
+
+---- system\models.py ----
+from django.contrib.auth.models import AbstractUser
+
+class User(AbstractUser):
+    kanji = models.CharField(max_length=32,blank=False,null=False,default="nobody")
+    
+    def __str__(self):
+        return self.username
+---- system\models.py ----
+
+---- ordersite\setings.py ----
+AUTH_USER_MODEL = 'system.User'   # 追加
+
+INSTALLED_APPS = [
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+    'system',                                 # 追加
+]
+---- ordersite\setings.py ----
+
+(python-kasoukankyo) C:\Users\izume\ordersite> python manage.py makemigrations system
+Migrations for 'system':
+  system\migrations\0001_initial.py
+    - Create model User
+
+◆◆◆ここまで
+
+■データベーステーブルの作成
+(python-kasoukankyo) C:\Users\izume\ordersite> python manage.py migrate
+Operations to perform:
+  Apply all migrations: admin, auth, contenttypes, sessions
+Running migrations:
+  Applying contenttypes.0001_initial... OK
+  Applying auth.0001_initial... OK
+  Applying admin.0001_initial... OK
+  Applying admin.0002_logentry_remove_auto_add... OK
+  Applying admin.0003_logentry_add_action_flag_choices... OK
+  Applying contenttypes.0002_remove_content_type_name... OK
+  Applying auth.0002_alter_permission_name_max_length... OK
+  Applying auth.0003_alter_user_email_max_length... OK
+  Applying auth.0004_alter_user_username_opts... OK
+  Applying auth.0005_alter_user_last_login_null... OK
+  Applying auth.0006_require_contenttypes_0002... OK
+  Applying auth.0007_alter_validators_add_error_messages... OK
+  Applying auth.0008_alter_user_username_max_length... OK
+  Applying auth.0009_alter_user_last_name_max_length... OK
+  Applying auth.0010_alter_group_name_max_length... OK
+  Applying auth.0011_update_proxy_permissions... OK
+  Applying sessions.0001_initial... OK
+
+■sqlite3 のインストール
+https://www.sqlite.org/download.html からダウンロード。
+
+Precompiled Binaries for Windows
+　sqlite-tools-win32-x86-3300100.zip
+
+解凍して、C:\sqlite3\ に保存。
+
+sqlite3.exe を C:\Users\izume\ordersite\ にコピー。
+
+■データベースの確認
+(python-kasoukankyo) C:\Users\izume\ordersite> python manage.py dbshell
+SQLite version 3.30.1 2019-10-10 20:19:45
+Enter ".help" for usage hints.
+sqlite> 
+sqlite> .table
+auth_group                  auth_user_user_permissions
+auth_group_permissions      django_admin_log
+auth_permission             django_content_type
+auth_user                   django_migrations
+auth_user_groups            django_session
+sqlite>  
+sqlite> .quit
+
+■管理者ユーザーの作成
+(python-kasoukankyo) C:\Users\izume\ordersite> python manage.py createsuperuser
+ユーザー名 (leave blank to use 'izume'): admin
+メールアドレス: izume@nc.u-tokyo.ac.jp
+Password:
+Password (again):
+Superuser created successfully.
+
+※両方足したのにした。
+
+■管理インターフェースにアクセス
+開発用サーバーの起動: python manage.py runserver
+
+http://127.0.0.1:8000/admin/
+
+■systemアプリケーションを作成
+(python-kasoukankyo) C:\Users\izume\ordersite> python manage.py startapp system
+
+(python-kasoukankyo) C:\Users\izume\ordersite> dir system
+ ドライブ C のボリューム ラベルは Windows です
+ ボリューム シリアル番号は 3A69-10DE です
+
+ C:\Users\izume\ordersite\system のディレクトリ
+
+2019/11/13  15:23    <DIR>          .
+2019/11/13  15:23    <DIR>          ..
+2019/11/13  15:23                66 admin.py
+2019/11/13  15:23                92 apps.py
+2019/11/13  15:23    <DIR>          migrations
+2019/11/13  15:23                60 models.py
+2019/11/13  15:23                63 tests.py
+2019/11/13  15:23                66 views.py
+2019/11/13  15:23                 0 __init__.py
+               6 個のファイル                 347 バイト
+               3 個のディレクトリ  791,754,543,104 バイトの空き領域
+
+---------------------
+system/__init__.py
+　　このディレクトリがPythonモジュールであることをPythonに認識させるための空ファイル
+system/admin.py
+　　管理サイトへ登録するモデルを設定するためのファイル
+system/apps.py
+　　アプリケーションの設定を記載するファイル、大抵はデフォルトのままでよい
+system/models.py
+　　モデルを定義するためのファイル
+system/tests.py
+　　ユニットテストを記述するためのファイル
+system/views.py
+　　ビューを定義するためのファイル
+system/migrations/
+　　データベースのマイグレーションファイルを格納するためのディレクトリ(Pythonモジュール)
+system/migrations/__init__.py
+　　このディレクトリがPythonモジュールであることをPythonに認識させるための空ファイル
+---------------------
+
+■systemアプリケーションの有効化
+ordersite\settings.py を編集
+---------------------
+# Application definition
+
+AUTH_USER_MODEL = 'system.User'   # カスタムユーザーモデルを使用
+
+
+INSTALLED_APPS = [
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+    'system',  # 追加
+]
+---------------------
+
+■トップページ(system)のビューを作成
+system\views.py を編集
+---------------------
+from django.shortcuts import render
+from django.http import HttpResponse
+
+# Create your views here.
+
+def toppage(request):
+    return HttpResponse("購入依頼書 トップページ")
+---------------------
+
+※ UTF-8 で保存すること!!
+
+■トップページのURL定義を追加
+ordersite\urls.py を編集
+---------------------
+from django.urls import path
+from django.contrib import admin
+from system import views as system_views
+
+urlpatterns = [
+    path('', system_views.toppage),
+    path('admin/', admin.site.urls),
+]
+---------------------
+
+■トップページの動作確認
+http://127.0.0.1:8000/ にアクセス
+
+■モデルの作成
+system\models.py を編集
+---------------------
+from django.db import models
+from django.utils import timezone
+from django.contrib.auth.models import AbstractUser
+from django.core.validators import FileExtensionValidator
+
+
+class syozoku(models.Model):
+    desc = models.CharField(max_length=16,blank=False,null=False,default="Undefined")
+
+    def __str__(self):
+        return self.desc
+
+    class Meta:
+        managed = True
+        db_table = 'syozoku_list'
+        #verbose_name = '所属'
+        #verbose_name_plural = '所属リスト'
+        
+class User(AbstractUser):
+    kanji = models.CharField(max_length=32,blank=False,null=False,default="nobody")
+    syozoku = models.CharField(max_length=32,blank=False,null=False,default="nobody")
+#    syozoku = models.ForeignKey(syozoku,on_delete=models.PROTECT)
+    tel = models.CharField(max_length=32,blank=False,null=False,default="nobody")
+    
+    def __str__(self):
+        return self.username
+
+class unit(models.Model):
+    classifier = models.CharField(max_length=12,blank=False,null=False,default="&nbsp;")
+
+    def __str__(self):
+        return self.classifier
+
+class tax(models.Model):
+    included = models.CharField(max_length=12,blank=False,null=False,default="&nbsp;")
+
+    def __str__(self):
+        return self.included
+    
+class order_status(models.Model):
+    status = models.CharField(max_length=16,blank=False,null=False,default="Undefined")
+
+    def __str__(self):
+        return self.status
+
+    class Meta:
+        managed = True
+        db_table = 'order_status_list'
+        #verbose_name = '発注状況'
+        #verbose_name_plural = '発注状況リスト'
+    
+        
+class BudCode(models.Model):
+    code = models.CharField(max_length=64,blank=False,null=False,default='Undefined')
+    name = models.CharField(max_length=64,blank=False,null=False,default='Undefined')
+    syozoku = models.ForeignKey(syozoku,on_delete=models.PROTECT)
+
+    def __str__(self):
+        return '{0},{1}'.format(self.name,self.code)
+
+    class Meta:
+        managed = True
+        db_table = 'budcodes'
+        #verbose_name = '予算コード'
+        #verbose_name_plural = '予算コード表'
+    
+class ProCode(models.Model):
+    code = models.CharField(max_length=32,blank=False,null=False,default='Undefined')
+    name = models.CharField(max_length=32,blank=False,null=False,default='Undefined')
+    syozoku = models.ForeignKey(syozoku,on_delete=models.PROTECT)
+
+    def __str__(self):
+        return '{0},{1}'.format(self.name,self.code)
+
+    class Meta:
+        managed = True
+        db_table = 'procodes'
+        #verbose_name = 'プロジェクトコード'
+        #verbose_name_plural = 'プロジェクトコード表'
+    
+class Bumon(models.Model):
+    syozoku = models.ForeignKey(syozoku,on_delete=models.PROTECT)
+    name = models.CharField(max_length=32,blank=False,null=False,default='Undefined')
+    budget_manager = models.CharField(max_length=32,blank=False,null=False,default='Undefined')
+
+    def __str__(self):
+        return '{name} <予算責任者: {manager}>'.format(name=self.name,manager=self.budget_manager)
+
+    class Meta:
+        managed = True
+        db_table = 'bumon'
+        #verbose_name = '部門コード'
+        #verbose_name_plural = '部門コード表'
+
+class DepCode(models.Model):
+    code = models.CharField(max_length=32,blank=False,null=False,default='Undefined')
+    name = models.CharField(max_length=32,blank=False,null=False,default='Undefined')
+    syozoku = models.ForeignKey(syozoku,on_delete=models.PROTECT)
+
+    def __str__(self):
+        return '{name},{code}'.format(name=self.name,code=self.code)
+
+    class Meta:
+        managed = True
+        db_table = 'depcodes'
+        #verbose_name = '経費'
+        #verbose_name_plural = '経費リスト'
+    
+        
+class Order(models.Model):
+    pdffile = models.FileField(blank=True,null=True,validators=[FileExtensionValidator(['pdf', ])],
+                               upload_to='pdffiles/',verbose_name='PDFファイル')
+    nendo = models.CharField(max_length=32,blank=False,null=False,default='',
+                             verbose_name='年度')
+    bango = models.IntegerField(verbose_name='整理番号')
+    order_status = models.ForeignKey(order_status,on_delete=models.PROTECT,verbose_name='発注状況')
+    order_date = models.DateField(default=timezone.now,verbose_name='依頼(発注)年月日')
+    department = models.ForeignKey(Bumon,on_delete=models.PROTECT,verbose_name='部門')
+    #budget_manager = models.CharField(max_length=32,blank=False,null=False,verbose_name='予算責任者')
+    orderer = models.CharField(max_length=32,blank=False,null=False,verbose_name='依頼(発注)者')
+    phone = models.CharField(max_length=32,blank=False,null=False,verbose_name='連絡先')
+    delivery_place = models.CharField(max_length=32,blank=False,null=False,verbose_name='納品場所')
+    department_code = models.ForeignKey(DepCode,on_delete=models.PROTECT,verbose_name='部署')
+    budget_subject_code = models.ForeignKey(BudCode,on_delete=models.PROTECT,verbose_name='予算科目')
+    project_code = models.ForeignKey(ProCode,on_delete=models.PROTECT,verbose_name='プロジェクト')
+    #department_code = models.CharField(max_length=32,blank=False,null=False,verbose_name='部署コード')
+    #budget_subject_name= models.CharField(max_length=32,blank=False,null=False,verbose_name='予算科目名称')
+    #budget_subject_code = models.CharField(max_length=32,blank=False,null=False,verbose_name='予算科目コード')
+    #project_name = models.CharField(max_length=32,blank=False,null=False,verbose_name='プロジェクト名称')
+    #project_code = models.CharField(max_length=32,blank=False,null=False,verbose_name='プロジェクトコード')
+    item_name = models.TextField(blank=False,null=False,verbose_name='品名')
+    kikaku = models.TextField(max_length=1024,blank=False,null=False,verbose_name='規格')
+    suuryou = models.PositiveIntegerField(blank=False,null=False,verbose_name='数量')
+    tanni = models.ForeignKey(unit,on_delete=models.PROTECT,verbose_name='単位')
+    tanka = models.PositiveIntegerField(blank=False,null=False,verbose_name='単価')
+    tanka_zei = models.ForeignKey(tax,on_delete=models.PROTECT,verbose_name='単価(税込/税抜)',
+                                  related_name='tanka_zei')
+    kingaku = models.PositiveIntegerField(blank=False,null=False,verbose_name='金額')
+    kingaku_zei = models.ForeignKey(tax,on_delete=models.PROTECT,verbose_name='金額(税込/税抜)',
+                                    related_name='kingaku_zei')
+    suppliers = models.CharField(max_length=64,blank=False,null=False,verbose_name='取引先名')
+    invoice_number = models.CharField(max_length=32,blank=False,null=False,verbose_name='請求書番号')
+    note = models.TextField(blank=True,null=True,verbose_name='備考')
+
+    def __str__(self):
+        return str(self.id)
+
+    class Meta:
+        managed = True
+        db_table = 'orders'
+        verbose_name = '発注'
+        verbose_name_plural = '発注リスト'
+---------------------
+
+◇モデルフィールドリファレンス
+https://docs.djangoproject.com/ja/2.2/ref/models/fields/
+
+※ 文字列のフィールド（CharField）
+nendo = models.CharField(max_length=32,blank=False,null=False,default='',verbose_name='年度')
+desc    = models.CharField(max_length=16,blank=False,null=False,default="Undefined")
+
+※ 多量のテキスト（TextField）
+note           = models.TextField(blank=True,null=True,verbose_name='備考')
+item_name = models.TextField(blank=False,null=False,verbose_name='品名')
+
+※ リレーションを表すフィールド（ForeignKey）
+syozoku = models.ForeignKey(syozoku,on_delete=models.PROTECT
+
+※ ファイルアップロードのフィールド（FileField）
+pdffile = models.FileField(blank=True,null=True,validators=[FileExtensionValidator(['pdf', ])],
+              upload_to='pdffiles/',verbose_name='PDFファイル')
+
+※ 数字のフィールド（IntegerField）
+bango = models.IntegerField(verbose_name='整理番号')
+
+※ 日付のフィールド（DateField）
+order_date = models.DateField(default=timezone.now,verbose_name='依頼(発注)年月日')
+
+※ 正の値かゼロ (0) のフィールド
+suuryou = models.PositiveIntegerField(blank=False,null=False,verbose_name='数量')
+tanka     = models.PositiveIntegerField(blank=False,null=False,verbose_name='単価')
+kingaku  = models.PositiveIntegerField(blank=False,null=False,verbose_name='金額')
+
+◇カスタムユーザーモデルを実装
+※ デフォルトのユーザーモデルを使って追加
+
+
+■マイグレーションファイルの作成
+(python-kasoukankyo) C:\Users\izume\ordersite> python manage.py makemigrations
+Migrations for 'system':
+  system\migrations\0001_initial.py
+    - Create model BudCode
+    - Create model Bumon
+    - Create model DepCode
+    - Create model order_status
+    - Create model syozoku
+    - Create model tax
+    - Create model unit
+    - Create model ProCode
+    - Create model Order
+    - Add field syozoku to depcode
+    - Add field syozoku to bumon
+    - Add field syozoku to budcode
+
+■ マイグレーションファイルの適用
+(python-kasoukankyo) C:\Users\izume\ordersite> python manage.py migrate
+Operations to perform:
+  Apply all migrations: admin, auth, contenttypes, sessions, system
+Running migrations:
+  Applying system.0001_initial... OK
+
+■ モデルを管理インターフェースに登録
+system\admin.py を編集
+---------------------
+from django.contrib import admin
+from django.contrib.auth.admin import UserAdmin
+
+from .models import *
+
+# https://qiita.com/okoppe8/items/10ae61808dc3056f9c8e
+# dir(UserAdmin) -> see UserAdmin.fieldsets
+#@admin.register(User)
+#class AdminUserAdmin(UserAdmin):
+#    fieldsets = (
+#        (None, {'fields': ('username', 'password')}),
+#      ('Personal info', {'fields': ('first_name', 'last_name', 'email','tel','syozoku')}),
+#      ('Permissions',
+#         {'fields': ('is_active',
+#                         'is_staff',
+#                         'is_superuser',
+#                         'groups',
+#                         'user_permissions')}),
+#      ('Important dates', {'fields': ('last_login', 'date_joined')}))
+
+#class BudCodeAdmin(admin.ModelAdmin):
+#    list_display = ('code','name','syozoku')
+
+#class DepCodeAdmin(admin.ModelAdmin):
+#    list_display = ('code','name','syozoku')
+
+admin.site.register(User,UserAdmin)
+#admin.site.register(User,AdminUserAdmin)
+admin.site.register(syozoku)
+#admin.site.register(BudCode,BudCodeAdmin)
+admin.site.register(ProCode)
+admin.site.register(Bumon)
+#admin.site.register(DepCode,DepCodeAdmin)
+admin.site.register(Order)
+admin.site.register(order_status)
+admin.site.register(unit)
+admin.site.register(tax)
+---------------------
+
+◆管理インタフェースからデータを登録
+http://127.0.0.1:8000/admin/
+
+■ データの内容を html で表示するためのテンプレートの作成
+テンプレートディレクトリの作成: mkdir system/templates/system
+
+--- order_list.html ----
+{% block pagetitle %}<center><H1>購入依頼書一覧</H1></center>{% endblock %}
+
+{% block contents %}
+    <script>
+     /*
+     $(document).ready(function() {
+	 $('#order_list').datatable({
+	     pageSize: 20,
+	     sort: [false,true,true,true,true,true,true,true,true,false,false],
+	     filters: [false,'select',false,'select','regexp',true,'regexp','regexp','regexp',false,false],
+	     filterText: '絞込',
+	     pagingDivSelector: "#paging-order_list"
+	 });
+	 $('#perpage').change(function() {
+	     $("#order_list").datatable({pageSize: $('#perpage').val()});
+	     console.log($('#perpage').val());
+	 });
+     });
+     */
+    </script>
+    
+    <style>
+     th {
+	 text-align: center;
+	 vertical-align: middle;
+     }
+    </style>
+    
+    {% if object_list %}
+	<div style="margin-bottom: 15px;">
+	    表示：
+	    <select name ="divn" style="display: inline" id="perpage">
+		<option value="10">10</option>
+		<option value="25" selected>25</option>
+		<option value="50">50</option>
+		<option value="500">500</option>
+	    </select>
+	    件/ページ
+	</div>
+	
+	<table id="order_list" class="table table-condensed table-bordered table-striped">
+	    <thead>
+		<th>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th>
+		<th>年度</th><th nowrap>整理<br />番号</th><th>発注<br />状況</th>
+		<th>依頼(発注)<br />年月日</th><th>品名</th><th>数量</th><th>金額</th>
+		<th>取引先</th><th>購入依頼書</th><th nowrap>見積等<br />(PDF)</th>
+	    </thead>
+	    <tbody>
+		{% for obj in object_list %}
+		    <tr>
+			<td style="text-align: center;">
+			    変更
+			</td>
+			<td style="text-align: center;">{{ obj.nendo }}</td>
+			<td style="text-align: center;">{{ obj.bango }}</td>
+			<td style="text-align: center;">{{ obj.order_status|cut:"発注" }}</td>
+			<td style="text-align: center;">{{ obj.order_date|date:"y/m/d" }}</td>
+			<td style="text-align: left;">{{ obj.item_name }}</td>
+			<td style="text-align: right;">{{ obj.suuryou }} {{ obj.tanni }}</td>
+			<td style="text-align: right;">{{ obj.kingaku|rjust:"20" }} 円</td>
+			<td style="text-align: left;">{{ obj.suppliers  }}</td>
+			<td style="text-align: center;">
+			    表示
+			</td>
+			<td style="text-align: center;">
+			    {% if obj.pdffile  %}
+			    表示
+			    {% else %}
+			    登録
+			    {% endif %}
+			</td>
+		    </tr>
+		{% endfor %}
+	    </tbody>
+	</table>
+	<div id="paging-order_list"></div>
+    {% else %}
+	まだ発注がありません
+{% endif %}
+
+{% endblock contents %}
+
+--- order_list.html ----
+
+
+■ ビュー関数の定義
+system\views.py を編集
+---------------------
+from django.shortcuts import render
+from django.views.generic import ListView
+#from django.contrib.auth.mixins import LoginRequiredMixin
+#from django.contrib.auth.decorators import login_required
+#from django.utils import timezone
+#from django.conf import settings
+#from django.forms import HiddenInput
+#from django.urls import reverse_lazy
+
+import os,re
+#import openpyxl
+from django.http import HttpResponse,Http404
+
+from .models import *
+from .forms import *
+
+class orderListView(LoginRequiredMixin,ListView):
+    model = Order
+---------------------
+
+system\forms.py を作成
+---------------------
+from django import forms
+
+from .models import *
+
+class orderCreateForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(orderCreateForm, self).__init__(*args, **kwargs)
+        if 'user' in kwargs['initial'].keys():
+            syozoku_id = int(kwargs['initial']['user'])
+            self.fields['department_code'].queryset = DepCode.objects.filter(syozoku=syozoku_id)
+            self.fields['budget_subject_code'].queryset = BudCode.objects.filter(syozoku=syozoku_id)
+            self.fields['project_code'].queryset = ProCode.objects.filter(syozoku=syozoku_id)
+            with open('log','w') as f:  # Windows なので変更
+            #with open('/tmp/log','w') as f:
+                f.write('sysoid '+str(syozoku_id))
+    
+    class Meta:
+        model = Order
+        fields = '__all__'
+        widgets = {
+            'nendo': forms.TextInput(attrs={'readonly': True,}),
+            'bango': forms.TextInput(attrs={'readonly': True,}),
+            'order_date': forms.DateInput(attrs={"type":"date"}),
+            'item_name': forms.Textarea(attrs={'rows':4, 'cols':60}),
+            'kikaku': forms.Textarea(attrs={'rows':4, 'cols':60}),
+            'note': forms.Textarea(attrs={'rows':4, 'cols':60}),
+        }
+---------------------
+
+ordersite\urls.py を編集
+---------------------
+from django.urls import path, include
+from django.contrib import admin
+#from django.contrib.auth import views as auth_views
+from system import views as system_views
+from system.views import orderListView
+
+urlpatterns = [
+    path('admin/', admin.site.urls),
+    path('', orderListView.as_view(),name='list'),
+]
+---------------------
+
+□購入依頼書一覧の表示
+
+再起動が必要かも？
+(python-kasoukankyo) C:\Users\izume\ordersite> python manage.py runserver
+
+http://127.0.0.1:8000/
+
+■ データの内容を登録する画面を作成
+
+--- order_form.html ----
+{% block pagetitle %}{{ pagetitle  }}{% endblock %}
+
+{% block contents %}
+
+<form action="" method="post" class="form-horizontal" role="form" enctype="multipart/form-data">
+    {% csrf_token %}
+    <table class="table table-condensed">
+       {{ form.as_table }}
+    </table>
+    <input type="submit" class="btn btn-warning" role="button">
+</form>
+
+{% endblock contents %}
+--- order_form.html ----
+
+■ ビュー関数の定義
+system\views.py を編集
+---------------------
+from django.shortcuts import render
+from django.views.generic import CreateView,ListView,UpdateView
+#from django.contrib.auth.mixins import LoginRequiredMixin
+#from django.contrib.auth.decorators import login_required
+from django.utils import timezone
+from django.conf import settings
+from django.forms import HiddenInput
+from django.urls import reverse_lazy
+
+import os,re
+import openpyxl
+from django.http import HttpResponse,Http404
+
+from .models import *
+from .forms import *
+
+class orderListView(ListView):
+#class orderListView(LoginRequiredMixin,ListView):
+    model = Order
+
+class orderCreateView(CreateView):
+#class orderCreateView(LoginRequiredMixin,CreateView):
+    model = Order
+    form_class = orderCreateForm
+    success_url = reverse_lazy('system:list')
+    
+    def get(self,request,*args,**kwargs):
+        n_last = Order.objects.order_by('-bango').first()
+        n_last = n_last.bango + 1 if n_last is not None else 1
+
+        s = User.objects.filter(username=request.user.username).first()
+        self.initial = { 'nendo': timezone.now().year,
+                         'order_date': timezone.now(),
+                         'orderer': request.user.last_name+request.user.first_name,
+                         'bango': n_last,
+                         'phone': request.user.tel,
+                         'user': s.id,
+        }
+        kwargs.update({'user': s.id})
+        self.extra_context = { 'pagetitle' : '新規オーダー' }
+
+        return super().get(self,request,*args,**kwargs)
+
+---------------------
+
+system\urls.py を作成
+---------------------
+from django.urls import path,include
+
+from .views import *
+
+urlpatterns = [
+    path('list', orderListView.as_view(),name='list'),
+    path('new', orderCreateView.as_view(),name='new'),
+#    path('update/<int:pk>', orderUpdateView.as_view(),name='update'),
+#    path('xlfile/<int:pk>', ExcelDownload, name='xlfile'),
+]
+---------------------
+
+ordersite\urls.py を編集
+---------------------
+from django.urls import path, include
+from django.contrib import admin
+#from django.contrib.auth import views as auth_views
+from system import views as system_views
+from system.views import orderListView
+
+urlpatterns = [
+    path('admin/', admin.site.urls),
+    path('', orderListView.as_view(),name='list'),
+    path('order/', include(('system.urls','system')),name='system'
+]
+---------------------
+
+□購入依頼書の新規登録
+
+再起動が必要かも？
+(python-kasoukankyo) C:\Users\izume\ordersite> python manage.py runserver
+
+http://127.0.0.1:8000/order/list
+
+■ データの内容を変更する画面を作成
+system\template\system\order_form.html 変更なし。
+
+■ ビュー関数の定義
+system\views.py を編集
+---------------------
+from django.views.generic import CreateView,ListView,UpdateView
+
+class orderUpdateView(UpdateView):
+#class orderUpdateView(LoginRequiredMixin,UpdateView):
+    model = Order
+    form_class = orderCreateForm
+    success_url = reverse_lazy('system:list')
+    
+    def get(self,request,*args,**kwargs):
+        self.extra_context = { 'pagetitle' : 'オーダー情報編集' }
+        s = User.objects.filter(username=request.user.username).first()
+        #self.initial = { 'user': s.id, }
+        
+        return super().get(self,request,*args,**kwargs)
+---------------------
+
+system\urls.py を編集
+---------------------
+from django.urls import path,include
+
+from .views import *
+
+urlpatterns = [
+    path('list', orderListView.as_view(),name='list'),
+    path('new', orderCreateView.as_view(),name='new'),
+    path('update/<int:pk>', orderUpdateView.as_view(),name='update'),
+#    path('xlfile/<int:pk>', ExcelDownload, name='xlfile'),
+]
+---------------------
+
+ordersite\urls.py を編集
+---------------------
+変更なし
+---------------------
+
+□購入依頼書の変更
+
+再起動が必要かも？
+(python-kasoukankyo) C:\Users\izume\ordersite> python manage.py runserver
+
+http://127.0.0.1:8000/order/update/整理番号
+
+■オーダー内容の変更ボタンを追加
+
+system\templates\system\order_list.html
+--------------
+<td style="text-align: center;">
+    <a class="btn btn-warning btn-xs" role="btn" href="{% url 'system:update' obj.pk %}">
+    変更
+    </a>
+</td>
+--------------
+
+■Excelファイル作成
+
+system\views.py に追加
+
+--------------
+#@login_required    
+def ExcelDownload(request,*args,**kwargs):
+    order = Order.objects.filter(pk=kwargs['pk']).first()
+    if order is None:
+        raise Http404
+
+    terms = {
+        'A2': '（ ■ 未発注　・　□ 発注済 ）' if str(order.order_status) == '未発注' else '（ □ 未発注　・■　 発注済 ）',
+        'B3':order.bango, 'B4': order.order_date,
+        'B5': re.sub('<.*>','',str(order.department)),
+        'B6': re.sub('.*<予算責任者: ','',str(order.department)).replace('>',''),
+        'B7': order.orderer, 'B8': order.phone, 'B9': order.delivery_place,
+        'C10': str(order.department_code).split(',')[0],'E10': str(order.department_code).split(',')[1],
+        'C11': str(order.budget_subject_code).split(',')[0],'E11': str(order.budget_subject_code).split(',')[1],
+        'C12': str(order.project_code).split(',')[0],'E12': str(order.project_code).split(',')[1],
+        'B13': order.item_name,'B14': order.kikaku, 'B15': str(order.suuryou)+str(order.tanni),
+        'B16': '{0:,}'.format(order.tanka)+'円('+str(order.tanka_zei)+')',
+        'B17': '{0:,}円({1})'.format(order.kingaku,order.kingaku_zei),
+        'B18': order.suppliers, 'B19': order.invoice_number,'B20': order.note,
+    }
+    wb = openpyxl.load_workbook(os.path.join(settings.DJANGO_ROOT,'static','order.xlsx'))
+
+    sheet = wb['購入依頼(発注)書']
+    for k,v in terms.items():
+        sheet[k] = v
+    
+    response = HttpResponse(content_type="application/ms-excel")
+    response['Content-Disposition'] = 'inline; filename=' + 'order0.xlsx'
+
+    wb.save(response)
+
+    return response
+--------------
+
+system\urls.py に追加
+---------------------
+from django.urls import path,include
+
+from .views import *
+
+urlpatterns = [
+    path('list', orderListView.as_view(),name='list'),
+    path('new', orderCreateView.as_view(),name='new'),
+    path('update/<int:pk>', orderUpdateView.as_view(),name='update'),
+    path('xlfile/<int:pk>', ExcelDownload, name='xlfile'),
+]
+---------------------
+
+■オーダー内容の変更ボタンを追加
+
+system\templates\system\order_list.html
+---------------------
+<td style="text-align: center;">
+    <a class="btn btn-info btn-xs" role="btn"  href="{% url 'system:xlfile' obj.pk %}">
+    表示
+    </a>
+</td>
+---------------------
+
+■Excelのテンプレートファイルを作成
+
+ordersite\static\order.xlsx
+
+■ordersite\settings.py を編集
+---------------------
+# Static files (CSS, JavaScript, Images)
+# https://docs.djangoproject.com/en/2.2/howto/static-files/
+
+DJANGO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+PROJECT_ROOT = os.path.dirname(DJANGO_ROOT)
+STATIC_ROOT = os.path.join(PROJECT_ROOT, 'static')
+
+STATIC_URL = '/static/'
+STATICFILES_DIRS = (
+    os.path.join(DJANGO_ROOT, 'static'),
+)
+
+MEDIA_ROOT = os.path.join(DJANGO_ROOT, 'files')
+MEDIA_URL ='/files/'
+---------------------
+
+■PDFファイルの表示ボタンを追加
+system\templates\system\order_list.html
+--------------
+<td style="text-align: center;">
+    {% if obj.pdffile  %}
+    <a class="btn btn-info btn-xs" role="btn"  href="/files/{{ obj.pdffile }}">表示</a>
+    {% endif %}
+</td>
+--------------
+
+■'DIRS': [os.path.join(BASE_DIR,'templates')],　修正
+
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [os.path.join(BASE_DIR,'templates')],
+        'APP_DIRS': True,
+        'OPTIONS': {
+            'context_processors': [
+                'django.template.context_processors.debug',
+                'django.template.context_processors.request',
+                'django.contrib.auth.context_processors.auth',
+                'django.contrib.messages.context_processors.messages',
+            ],
+        },
+    },
+]
+
+■PDFファイルのurlpatterns の設定
+
+system\urls.py
+---------------------
+from django.urls import path, include
+from django.contrib import admin
+from django.contrib.auth import views as auth_views
+from system import views as system_views
+from system.views import orderListView
+from django.conf import settings
+
+urlpatterns = [
+    path('admin/', admin.site.urls),
+    path('', orderListView.as_view(),name='list'),
+    path('ordersite/', include(('system.urls','system')),name='system'),
+]
+
+if settings.DEBUG:
+    from django.conf.urls.static import static
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+---------------------
+
+■ユーザー関係の設定
+
+--- system\admin.py --------
+from django.contrib import admin
+from django.contrib.auth.admin import UserAdmin
+
+from .models import *
+
+# https://qiita.com/okoppe8/items/10ae61808dc3056f9c8e
+# dir(UserAdmin) -> see UserAdmin.fieldsets
+#@admin.register(User)
+class AdminUserAdmin(UserAdmin):
+    fieldsets = (
+        (None, {'fields': ('username', 'password')}),
+      ('Personal info', {'fields': ('first_name', 'last_name', 'email','tel','syozoku')}),
+      ('Permissions',
+         {'fields': ('is_active',
+                         'is_staff',
+                         'is_superuser',
+                         'groups',
+                         'user_permissions')}),
+      ('Important dates', {'fields': ('last_login', 'date_joined')}))
+
+class BudCodeAdmin(admin.ModelAdmin):
+    list_display = ('code','name','syozoku')
+
+class DepCodeAdmin(admin.ModelAdmin):
+    list_display = ('code','name','syozoku')
+
+#admin.site.register(User,UserAdmin)
+admin.site.register(User,AdminUserAdmin)
+admin.site.register(syozoku)
+admin.site.register(BudCode,BudCodeAdmin)
+admin.site.register(ProCode)
+admin.site.register(Bumon)
+admin.site.register(DepCode,DepCodeAdmin)
+admin.site.register(Order)
+admin.site.register(order_status)
+admin.site.register(unit)
+admin.site.register(tax)
+-----------------------------------------
+
+---- system\models.py ----
+class User(AbstractUser):
+    kanji = models.CharField(max_length=32,blank=False,null=False,default="nobody")
+#    syozoku = models.CharField(max_length=32,blank=False,null=False,default="nobody")
+    syozoku = models.ForeignKey(syozoku,on_delete=models.PROTECT)
+    tel = models.CharField(max_length=32,blank=False,null=False,default="nobody")
+    
+    def __str__(self):
+        return self.username
+-----------------------------------------
+
+#class orderListView(ListView):
+class orderListView(LoginRequiredMixin,ListView):
+
+#class orderCreateView(CreateView):
+class orderCreateView(LoginRequiredMixin,CreateView):
+
+#class orderUpdateView(UpdateView):
+class orderUpdateView(LoginRequiredMixin,UpdateView):
+
+■DBの初期登録
+
+一旦、DB(sqlite3.db)を削除してから再作成する。
+
+createsuperuserを実行するときに、所属がadminになるように一時的に変更
+
+---- system\models.py ------
+class User(AbstractUser):
+    kanji = models.CharField(max_length=32,blank=True,null=True,default="nobody")
+#    kanji = models.CharField(max_length=32,blank=False,null=False,default="nobody")
+#    syozoku = models.CharField(max_length=32,blank=False,null=False)
+    syozoku = models.ForeignKey(syozoku,on_delete=models.PROTECT,default=1)
+#    tel = models.CharField(max_length=32,blank=True,null=True,default="nobody")
+    tel = models.CharField(max_length=32,blank=False,null=False,default="nobody")
+------------------------------
+
+■所属テーブルに admin を登録しておく。
+
+(python-kasoukankyo) C:\Users\izume\ordersite>python manage.py dbshell
+SQLite version 3.30.1 2019-10-10 20:19:45
+Enter ".help" for usage hints.
+sqlite> .table
+auth_group                    order_status_list
+auth_group_permissions        orders
+auth_permission               procodes
+budcodes                      syozoku_list
+bumon                         system_tax
+depcodes                      system_unit
+django_admin_log              system_user
+django_content_type           system_user_groups
+django_migrations             system_user_user_permissions
+django_session
+sqlite> .schema syozoku_list
+CREATE TABLE IF NOT EXISTS "syozoku_list" ("id" integer NOT NULL PRIMARY KEY AUTOINCREMENT, "desc" varchar(16) NOT NULL);
+sqlite> insert into syozoku_list values(1, 'admin');
+sqlite> select * from syozoku_list;
+1|admin
+sqlite>                                                                
+
+■管理者ユーザーの作成
+
+(python-kasoukankyo) C:\Users\izume\ordersite>python manage.py createsuperuser
+ユーザー名: admin
+メールアドレス: izume@nc.u-tokyo.ac.jp
+Password:
+Password (again):
+Superuser created successfully.
+
+
+syozoku のdefault設定を削除
+---- system\models.py ------
+class User(AbstractUser):
+
+    syozoku = models.ForeignKey(syozoku,on_delete=models.PROTECT)
+
+------------------------------
+
+■必要に応じて管理者画面からDBを登録する。
+
+http://127.0.0.1:8000/admin/
+
+■ユーザーログインの設定
+
+---- ordersite\settings.py ----
+LOGIN_URL = '/accounts/login/'
+------------------------------
+
+---- ordersite\urls.py ----
+    path('accounts/', include('django.contrib.auth.urls')),
+    path('logout/', auth_views.LogoutView.as_view(), name='logout'),
+--------------------------
+
+ordersite\templates ディレクトリを作成
+
+@login_required
+
+ordersite\static java関係のファイルをコピー
+
+■新規作成時の年度の値に年が入っていたので、入力時点の年度を入れるようにする。
+---- system\views.py ----
+class orderCreateView(LoginRequiredMixin,CreateView):
+
+        
+        if timezone.now().month > 3:
+            konnendo = timezone.now().year
+        else:
+            konnendo = timezone.now().year - 1
+        
+        self.initial = { 'nendo': konnendo,
+                         'order_date': timezone.now(),
+                         'orderer': request.user.last_name+request.user.first_name,
+                         'bango': n_last,
+                         'phone': request.user.tel,
+                         'user': s.id,
+---------------------------
+
+■新規作成時、年度の項目が変更できなかったので、変更可能にする。
+---- system\forms.py ----
+class orderCreateForm(forms.ModelForm):
+    
+    class Meta:
+
+#            'nendo': forms.TextInput(attrs={'readonly': True,}),
+            'nendo': forms.TextInput(),
+---------------------------
+
+■必須項目から外す
+---- system\models.py ----
+class Order(models.Model):
+
+#    delivery_place = models.CharField(max_length=32,blank=False,null=False,verbose_name='納品場所')
+    delivery_place = models.CharField(max_length=32,blank=True,null=True,verbose_name='納品場所')
+
+その他もろもろ
+---------------------------
+
+■ボタンの表示を[登録]に変更
+---- template\system\templates\order_form.html ----
+    <input type="submit" class="btn btn-warning" role="button" value="登録">
+---------------------------
+
+■admin画面の表示を修正
+system\admin.py を修正
+-----
+class AdminUserAdmin(UserAdmin):
+
+    list_display = ('username','last_name','first_name','email','syozoku') #追加
+-----
+
+■ユーザー登録時にSYOZOKUエラー
+SYSTEM/MODELS.PY　修正
+
+class User(AbstractUser):
+    syozoku = models.ForeignKey(syozoku,on_delete=models.PROTECT,default=4)
+
+DEFAULTを設定
+syozoku Tableに「未登録」を追加して、idが「４」なので、
+defaultに4を設定。
+
+■一覧表示を逆順に表示する。
+system/views.py  を修正
+
+    def get_queryset(self):
+
+            return Order.objects.select_related().filter(condition_nendo & condition_item_name & condition_syozoku_id).order_by('-bango')
+
+
+■新規登録の時、コードの選択ができないのはなぜ？更新時はコードの選択はできるのに。
+　コードの選択は、ユーザの所属部署のコードだけにしたい。
+
+---- system/forms.py ----
+class orderCreateForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(orderCreateForm, self).__init__(*args, **kwargs)
+        if 'user' in kwargs['initial'].keys():
+            syozoku_id = int(kwargs['initial']['user'])
+            self.fields['department'].queryset = Bumon.objects.filter(syozoku=syozoku_id)
+            self.fields['department_code'].queryset = DepCode.objects.filter(syozoku=syozoku_id)
+            self.fields['budget_subject_code'].queryset = BudCode.objects.filter(syozoku=syozoku_id)
+            self.fields['project_code'].queryset = ProCode.objects.filter(syozoku=syozoku_id)
+----
+
+---- system/views.py ----
+class orderCreateView(LoginRequiredMixin,CreateView):
+    model = Order
+    form_class = orderCreateForm
+    success_url = reverse_lazy('system:list')
+    
+    def get(self,request,*args,**kwargs):
+
+        if timezone.now().month > 3:
+            konnendo = timezone.now().year
+        else:
+            konnendo = timezone.now().year - 1
+
+        n_last = Order.objects.filter(nendo = konnendo,syozoku=request.user.syozoku).order_by('-bango').first()
+        n_last = n_last.bango + 1 if n_last is not None else 1
+        self.extra_context = { 'pagetitle' : '新規オーダー' }
+        s = User.objects.filter(username=request.user.username).first()
+        self.initial = { 'nendo': konnendo,
+                         'order_date': timezone.now(),
+                         'orderer': request.user.last_name+request.user.first_name,
+                         'bango': n_last,
+                         'phone': request.user.tel,
+                         'tanka_zei': 2,
+                         'kingaku_zei': 1,
+                         'syozoku': s.syozoku,
+                         'user': s.syozoku_id,
+        }
+        kwargs.update({'user': s.syozoku_id})
+
+        return super().get(self,request,*args,**kwargs)
+
+class orderUpdateView(LoginRequiredMixin,UpdateView):
+    model = Order
+    form_class = orderCreateForm
+    success_url = reverse_lazy('system:list')
+    
+    def get(self,request,*args,**kwargs):
+        self.extra_context = { 'pagetitle' : 'オーダー情報編集' }
+        s = User.objects.filter(username=request.user.username).first()
+        self.initial = {'user': s.syozoku_id}
+        kwargs.update({'user': s.syozoku_id})
+
+        return super().get(self,request,*args,**kwargs)
+----
+
+■新規・更新画面で、SYOZOKUを変更できなくする。
+
+
+
+
+じゃがありご
+
+＞＞いまここ[20191226]＞＞
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+--------------------------------------------------------------------------------------
+◇中断して始めるときはこれをやってから
+　Python仮想環境の有効化
+　　C:\Users\izume> python-kasoukankyo\Scripts\activate
+　プロジェクトディレクトリに移動
+　　(python-kasoukankyo) C:\Users\izume> cd ordersite
+　実行
+　　(python-kasoukankyo) C:\Users\izume\ordersite> python manage.py runserver
+
+◇トップページ
+http://127.0.0.1:8000/
+
+◇管理インターフェース
+http://127.0.0.1:8000/admin/
+
+
+
+--------------------------------------------------------------------------------------
+◆openpyxl モジュールの追加
+(python-kasoukankyo) C:\Users\izume\ordersite>pip install openpyxl
+Collecting openpyxl
+  Downloading https://files.pythonhosted.org/packages/6f/af/88ff9eef0b8f665aee1111ac6cede5ad12190c5bd726242bd2b26fc21b32/openpyxl-3.0.0.tar.gz (172kB)
+     |████████████████████████████████| 174kB 6.4MB/s
+Collecting jdcal (from openpyxl)
+  Downloading https://files.pythonhosted.org/packages/f0/da/572cbc0bc582390480bbd7c4e93d14dc46079778ed915b505dc494b37c57/jdcal-1.4.1-py2.py3-none-any.whl
+Collecting et_xmlfile (from openpyxl)
+  Downloading https://files.pythonhosted.org/packages/22/28/a99c42aea746e18382ad9fb36f64c1c1f04216f41797f2f0fa567da11388/et_xmlfile-1.0.1.tar.gz
+Installing collected packages: jdcal, et-xmlfile, openpyxl
+  Running setup.py install for et-xmlfile ... done
+  Running setup.py install for openpyxl ... done
+Successfully installed et-xmlfile-1.0.1 jdcal-1.4.1 openpyxl-3.0.0
+WARNING: You are using pip version 19.2.3, however version 19.3.1 is available.
+You should consider upgrading via the 'python -m pip install --upgrade pip' command.
+
+◆pip のアップグレード
+(python-kasoukankyo) C:\Users\izume\ordersite>python -m pip install --upgrade pip
+Collecting pip
+  Downloading https://files.pythonhosted.org/packages/00/b6/9cfa56b4081ad13874b0c6f96af8ce16cfbc1cb06bedf8e9164ce5551ec1/pip-19.3.1-py2.py3-none-any.whl (1.4MB)
+     |████████████████████████████████| 1.4MB 6.4MB/s
+Installing collected packages: pip
+  Found existing installation: pip 19.2.3
+    Uninstalling pip-19.2.3:
+      Successfully uninstalled pip-19.2.3
+Successfully installed pip-19.3.1
+
+
+
+=========================================
+flask.nc.u-tokyo.ac.jp に python3.7.5 をインストール
+
+izume@flask:~$ curl -O https://www.python.org/ftp/python/3.7.5/Python-3.7.5.tgz
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100 22.0M  100 22.0M    0     0  21.5M      0  0:00:01  0:00:01 --:--:-- 21.5M
+izume@flask:~$ tar xvfz Python-3.7.5.tgz
+izume@flask:~$ cd Python-3.7.5/
+izume@flask:~/Python-3.7.5$ make
+izume@flask:~/Python-3.7.5$ sudo -H make install
+
+izume@flask:~$ mkdir python37
+izume@flask:~$ cd python37
+izume@flask:~/python37$ pipenv --python /usr/local/python375/bin/python3 install
+Virtualenv already exists!
+Removing existing virtualenv…
+Creating a virtualenv for this project…
+Pipfile: /home/izume/python37/Pipfile
+Using /usr/local/python375/bin/python3 (3.7.5) to create virtualenv…
+? Creating virtual environment...Already using interpreter /usr/local/python375/bin/python3
+Using base prefix '/usr/local/python375'
+New python executable in /home/izume/.local/share/virtualenvs/python37-bR5JIZq3/bin/python3
+Also creating executable in /home/izume/.local/share/virtualenvs/python37-bR5JIZq3/bin/python
+Installing setuptools, pip, wheel...
+done.
+Running virtualenv with interpreter /usr/local/python375/bin/python3
+
+? Successfully created virtual environment!
+Virtualenv location: /home/izume/.local/share/virtualenvs/python37-bR5JIZq3
+Creating a Pipfile for this project…
+Pipfile.lock not found, creating…
+Locking [dev-packages] dependencies…
+Locking [packages] dependencies…
+Updated Pipfile.lock (a65489)!
+Installing dependencies from Pipfile.lock (a65489)…
+   ???????????????????????????????? 0/0 ― 00:00:00
+To activate this project's virtualenv, run pipenv shell.
+Alternatively, run a command inside the virtualenv with pipenv run.くいｔ（）
+izume@flask:~/python37$
+izume@flask:~/python37$ pipenv shell
+Launching subshell in virtual environment…
+ . /home/izume/.local/share/virtualenvs/python37-bR5JIZq3/bin/activate
+izume@flask:~/python37$  . /home/izume/.local/share/virtualenvs/python37-bR5JIZq3/bin/activate
+(python37) izume@flask:~/python37$ python --version
+Python 3.7.5
+(python37) izume@flask:~/python37$
+
+■Python仮想環境の作成
+(python37) izume@flask:~$ python3.7 -m venv python-kasoukankyo
+
+■Python仮想環境の有効化
+(python37) izume@flask:~$ source python-kasoukankyo/bin/activate
+(python-kasoukankyo) izume@flask:~$
+
+■Djangoと追加のモジュールをインストール
+(python-kasoukankyo) izume@flask:~$ sudo pip install -U Django==2.2.* django-
+debug-toolbar
+
+■プロジェクトの作成
+(python-kasoukankyo) izume@flask:~$ django-admin startproject ordersite
+(python-kasoukankyo) izume@flask:~$ cd ordersite
+(python-kasoukankyo) izume@flask:~/ordersite$
+
+
+なんかうまくいかない。
+
+このページを参照して再インストールしてみる。
+https://www.python.jp/install/ubuntu/index.html
+
+https://www.python.org/downloads より、パッケージをダウンロード
+$ tar xzf Python-3.7.5.tgz
+$ cd Python-3.7.5
+$ ./configure --enable-shared
+$ make
+$ sudo make install
+$ sudo sh -c "echo '/usr/local/lib' > /etc/ld.so.conf.d/custom_python3.conf"
+$ sudo ldconfig
+
+$ python3.7 --version
+Python 3.7.5
+
+■ホスト名とポート番号を指定してサーバを起動
+python manage.py runserver flask.nc.u-tokyo.ac.jp:8004
+
+
+
+--------------------
+プルダウンで出て来る数字無視して桁溢れ狙ったら怒られた
+OverflowError at /ordersite/new
+Python int too large to convert to SQLite INTEGER
+数量とか値段とか
+
+--------------------
+更新の時、所属を変更すると番号がおかしくなるので、変更できなくしないといけないんだが・・・。
+
+
+
+
+
+
+
