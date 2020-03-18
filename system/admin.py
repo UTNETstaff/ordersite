@@ -20,13 +20,13 @@ class AdminUserAdmin(UserAdmin):
     list_display = ('username','last_name','first_name','email','syozoku')
 
 class BudCodeAdmin(admin.ModelAdmin):
-    list_display = ('code','name','syozoku')
+    list_display = ('code','name')#,'syozoku')
 
 class DepCodeAdmin(admin.ModelAdmin):
-    list_display = ('code','name','syozoku')
+    list_display = ('code','name')#,'syozoku')
 
 class ProCodeAdmin(admin.ModelAdmin):
-    list_display = ('code','name','syozoku')
+    list_display = ('code','name')#,'syozoku')
 
 class OrderAdmin(admin.ModelAdmin):
     list_display = ('nendo','department','bango','item_name','suuryou','kingaku','syozoku')
